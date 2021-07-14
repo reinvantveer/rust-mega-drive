@@ -9,7 +9,7 @@ use megadrive_graphics::Renderer;
 use megadrive_input::Controllers;
 use megadrive_util::rng::PseudoRng;
 use megadrive_sys::vdp::{Sprite, SpriteSize, Tile, TileFlags, VDP};
-use megadrive_alloc::ALLOCATOR;
+use megadrive_alloc::heap::Heap;
 
 static mut NEW_FRAME: u16= 0;
 
@@ -46,11 +46,16 @@ fn upload_graphics(vdp: &mut VDP) {
     vdp.set_tiles(1, TILE_DATA);
 }
 
+#[global_allocator]
+static ALLOCATOR: Heap = Heap::empty();
+
 
 #[no_mangle]
 pub fn main() -> ! {
-    // Initialize the allocator to provide actual heap allocations
-    unsafe { ALLOCATOR.init() }
+    unsafe {
+        // Initialize the allocator to provide actual heap allocations
+        ALLOCATOR.init()
+    }
 
     let mut renderer = Renderer::new();
     let mut controllers = Controllers::new();
@@ -80,6 +85,8 @@ pub fn main() -> ! {
         flipped.push(random_number & 1); // mask with 1, so either 0 or 1
 
         let heads_or_tails_tile_idx = flipped.pop().unwrap() + 1;
+        // let heads_or_tails_tile_idx = (random_number & 1) + 1;
+
         let mut sprite = Sprite::with_flags(
             TileFlags::for_tile(heads_or_tails_tile_idx, 0),
             SpriteSize::Size1x1);
