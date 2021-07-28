@@ -4,6 +4,9 @@ use core::ptr::read_volatile;
 use megadrive_sys::vdp::VDP;
 use megadrive_graphics::Renderer;
 use megadrive_graphics::default_ascii::DEFAULT_FONT_1X1;
+use core::fmt::Display;
+use core::fmt::format;
+use core::convert::TryInto;
 
 static mut NEW_FRAME: u16 = 0;
 
@@ -28,13 +31,21 @@ fn panic(_info: &PanicInfo) -> ! {
     let x_off = 64 + half_screen_width;
     let y_off = 128 + half_screen_height;
 
+    // This, unfortunately does not compile due to an undefined __mulsi3 in ld.ldd
+    // triggered by the downcast_ref::<&str>()
+    // let mut panic_text: &str = &_info.payload().downcast_ref::<&str>().unwrap();
+
+    // Set a default message
+    let mut panic_text= "Panic!";
+
+    if let Some(args) = _info.message() {
+        // TODO: implement `write` for buffer_with_write_trait for
+        // https://doc.rust-lang.org/src/core/fmt/mod.rs.html#443-447
+        panic_text = args.fmt(buffer_with_write_trait);
+    }
+
     loop {
         renderer.clear();
-
-        // This, unfortunately does not compile due to an undefined __mulsi3 in ld.ldd
-        // triggered by the downcast_ref::<&str>()
-        // let mut panic_text: &str = &_info.payload().downcast_ref::<&str>().unwrap();
-        let panic_text= "Panic!";
 
         DEFAULT_FONT_1X1.blit_text(&mut renderer, panic_text, x_off as u16, y_off as u16);
         renderer.render(&mut vdp);
