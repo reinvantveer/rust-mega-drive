@@ -44,6 +44,7 @@ pub fn main() -> ! {
         // Do nothing if A button isn't pressed
         if let Some(c) = controllers.controller_state(0) {
             if c.down(Button::A) { roll = true; }
+            if c.down(Button::B) { panic!("Error: button B was pressed")}
         }
 
         if roll == false {
