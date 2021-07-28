@@ -47,7 +47,7 @@ pub fn main() -> ! {
             if c.down(Button::B) { panic!("Error: button B was pressed")}
         }
 
-        if roll == false {
+        if !roll {
             let text = "Press A to flip";
             DEFAULT_FONT_1X1.blit_text(&mut renderer, text, x_off, y_off);
         } else {
