@@ -31,10 +31,12 @@ pub fn main() -> ! {
     DEFAULT_FONT_1X1.load(&mut vdp);
 
     let mut roll = false;
+    let mut frame = 0u16;
 
     loop {
         renderer.clear();
         controllers.update();
+        frame = (frame + 1) & 0x7fff;
 
         // Always roll: it updates the seed so that the outcome will be different every game
         let random_number = rng.random();
