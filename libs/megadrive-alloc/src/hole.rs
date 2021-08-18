@@ -12,16 +12,6 @@ pub struct HoleList {
 }
 
 impl HoleList {
-    /// Creates an empty `HoleList`.
-    pub const fn empty() -> HoleList {
-        HoleList {
-            first: Hole {
-                size: 0,
-                next: None,
-            },
-        }
-    }
-
     /// Creates a `HoleList` that contains the given hole. This function is unsafe because it
     /// creates a hole at the given `hole_addr`. This can cause undefined behavior if this address
     /// is invalid or if memory from the `[hole_addr, hole_addr+size) range is used somewhere else.
