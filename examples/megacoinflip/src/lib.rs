@@ -50,7 +50,7 @@ fn upload_graphics(vdp: &mut VDP) {
 #[no_mangle]
 pub fn main() -> ! {
     // Initialize the allocator to provide actual heap allocations
-    unsafe { ALLOCATOR.init() }
+    unsafe { ALLOCATOR.init(); }
 
     let mut renderer = Renderer::new();
     let mut controllers = Controllers::new();
@@ -67,7 +67,6 @@ pub fn main() -> ! {
 
     vdp.enable_interrupts(false, true, false);
     vdp.enable_display(true);
-    let mut frame = 0u16;
 
     let mut flipped = Vec::new();
 
@@ -88,7 +87,6 @@ pub fn main() -> ! {
         sprite.y = y_off as u16;
         renderer.draw_sprite(sprite);
 
-        frame = (frame + 1) & 0x7fff;
         renderer.render(&mut vdp);
         // vsync
         wait_for_vblank();
