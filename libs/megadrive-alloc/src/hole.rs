@@ -4,7 +4,7 @@
 use core::mem::size_of;
 use core::alloc::Layout;
 
-use crate::heap::{align_up};
+use crate::heap::align_up;
 
 /// A sorted list of holes. It uses the the holes itself to store its nodes.
 pub struct HoleList {
