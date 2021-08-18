@@ -134,18 +134,6 @@ impl Alloc {
     pub fn top(&self) -> usize {
         self.bottom + self.size
     }
-
-    /// Extends the size of the heap by creating a new hole at the end
-    ///
-    /// # Unsafety
-    ///
-    /// The new extended area must be valid
-    pub unsafe fn extend(&mut self, by: usize) {
-        let top = self.top();
-        let layout = Layout::from_size_align(by, 1).unwrap();
-        self.holes.deallocate(top as *mut u8, layout);
-        self.size += by;
-    }
 }
 
 /// Align upwards. Returns the smallest x with alignment `align`
