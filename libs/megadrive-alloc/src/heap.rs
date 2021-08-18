@@ -3,10 +3,10 @@
 
 use core::mem;
 use core::alloc::{Layout, GlobalAlloc};
-use core::cell::RefCell;
 
 use crate::hole::{Hole, HoleList};
 use megadrive_sys::heap;
+use core::cell::UnsafeCell;
 
 /// A fixed size heap backed by a linked list of free memory blocks.
 pub struct Heap {
