@@ -8,11 +8,10 @@ use crate::hole::{Hole, HoleList};
 use megadrive_sys::heap;
 use core::cell::UnsafeCell;
 
-/// A fixed size heap backed by a linked list of free memory blocks.
-pub struct Heap {
-    bottom: usize,
-    size: usize,
-    holes: HoleList,
+pub struct Alloc {
+    pub(crate) bottom: usize,
+    pub(crate) size: usize,
+    pub(crate) holes: UnsafeCell<HoleList>,
 }
 
 impl Heap {
