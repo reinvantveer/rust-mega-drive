@@ -4,24 +4,14 @@
 use core::mem::size_of;
 use core::alloc::Layout;
 
-use crate::heap::{align_up};
+use crate::heap::align_up;
 
 /// A sorted list of holes. It uses the the holes itself to store its nodes.
 pub struct HoleList {
-    first: Hole, // dummy
+    pub(crate) first: Hole, // dummy
 }
 
 impl HoleList {
-    /// Creates an empty `HoleList`.
-    pub const fn empty() -> HoleList {
-        HoleList {
-            first: Hole {
-                size: 0,
-                next: None,
-            },
-        }
-    }
-
     /// Creates a `HoleList` that contains the given hole. This function is unsafe because it
     /// creates a hole at the given `hole_addr`. This can cause undefined behavior if this address
     /// is invalid or if memory from the `[hole_addr, hole_addr+size) range is used somewhere else.
@@ -84,8 +74,8 @@ impl HoleList {
 /// A block containing free memory. It points to the next hole and thus forms a linked list.
 #[cfg(not(test))]
 pub struct Hole {
-    size: usize,
-    next: Option<&'static mut Hole>,
+    pub(crate) size: usize,
+    pub(crate) next: Option<&'static mut Hole>,
 }
 
 #[cfg(test)]

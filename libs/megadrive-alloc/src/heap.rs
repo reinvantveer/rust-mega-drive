@@ -3,43 +3,77 @@
 
 use core::mem;
 use core::alloc::{Layout, GlobalAlloc};
-use core::cell::RefCell;
 
 use crate::hole::{Hole, HoleList};
 use megadrive_sys::heap;
+use core::cell::UnsafeCell;
 
-/// A fixed size heap backed by a linked list of free memory blocks.
-pub struct Heap {
-    bottom: usize,
-    size: usize,
-    holes: HoleList,
+pub struct Alloc {
+    pub(crate) bottom: usize,
+    pub(crate) size: usize,
+    pub(crate) holes: UnsafeCell<HoleList>,
 }
 
-impl Heap {
-    /// Creates an empty heap. All allocate calls will return `None`.
-    pub const fn empty() -> Heap {
-        Heap {
-            bottom: 0,
-            size: 0,
-            holes: HoleList::empty(),
-        }
+unsafe impl GlobalAlloc for Alloc {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let mut holes = self.holes
+            .get()
+            .as_mut();
+
+        holes.as_mut()
+             .unwrap()
+             .allocate_first_fit(layout)
+             .ok()
+             .map_or(0 as *mut u8, |allocation| allocation)
     }
 
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        self.holes
+            .get()
+            .as_mut()
+            .unwrap()
+            .deallocate(ptr, layout)
+    }
+}
+
+/// SAFETY:
+/// The Sync implementation block is required by the compiler in order to have a shared internally
+/// mutable Heap.
+///
+/// This is basically a dummy implementation. The heap cannot be safely used across thread
+/// boundaries as it is likely to lead to data races. So: don't use in multi-threaded apps.
+unsafe impl Sync for Alloc {}
+
+impl Alloc {
     // Initializes an empty heap
     //
     // SAFETY:
-    // This function must be called at most once and must only be used on an
-    // empty heap.
+    // This function must be called at most once
+    pub const fn empty() -> Self {
+        Self {
+            bottom: 0,
+            size: 0,
+            holes: UnsafeCell::new(HoleList {
+                first: Hole {
+                    size: 0,
+                    next: None,
+                },
+            }),
+        }
+    }
+
     pub unsafe fn init(&mut self) {
         // Create the raw slice from the magical heap function from megadrive_sys
         let heap_slice = heap();
 
-        // Take a raw pointer to the slice as the bottom
-        self.bottom = heap_slice.as_ptr() as usize;
+        let bottom = heap_slice.as_ptr() as usize;
+        let size = heap_slice.len();
 
-        // An then the size as the length of the slice
-        self.size = heap_slice.len();
-        self.holes = HoleList::new(self.bottom, self.size);
+        self.bottom = bottom;
+        self. size = size;
+        self.holes = UnsafeCell::new(
+                HoleList::new(bottom, size)
+            );
     }
 
     /// Allocates a chunk of the given size with the given alignment. Returns a pointer to the
@@ -55,7 +89,13 @@ impl Heap {
         let size = align_up(size, mem::align_of::<Hole>());
         let layout = Layout::from_size_align(size, layout.align()).unwrap();
 
-        self.holes.allocate_first_fit(layout)
+        unsafe {
+            self.holes
+                .get()
+                .as_mut()
+                .unwrap()
+                .allocate_first_fit(layout)
+        }
     }
 
     /// Frees the given allocation. `ptr` must be a pointer returned
@@ -73,7 +113,11 @@ impl Heap {
         let size = align_up(size, mem::align_of::<Hole>());
         let layout = Layout::from_size_align(size, layout.align()).unwrap();
 
-        self.holes.deallocate(ptr, layout);
+        self.holes
+            .get()
+            .as_mut()
+            .unwrap()
+            .deallocate(ptr, layout);
     }
 
     /// Returns the bottom address of the heap.
@@ -90,57 +134,7 @@ impl Heap {
     pub fn top(&self) -> usize {
         self.bottom + self.size
     }
-
-    /// Extends the size of the heap by creating a new hole at the end
-    ///
-    /// # Unsafety
-    ///
-    /// The new extended area must be valid
-    pub unsafe fn extend(&mut self, by: usize) {
-        let top = self.top();
-        let layout = Layout::from_size_align(by, 1).unwrap();
-        self.holes.deallocate(top as *mut u8, layout);
-        self.size += by;
-    }
 }
-
-struct RefCellHeap {
-    heap: RefCell<Heap>
-}
-
-impl RefCellHeap {
-    const fn new() -> RefCellHeap {
-        RefCellHeap {
-            heap: RefCell::new(Heap::empty())
-        }
-    }
-}
-
-static HEAP: RefCellHeap = RefCellHeap::new();
-
-unsafe impl GlobalAlloc for Heap {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        HEAP.heap
-            .borrow_mut()
-            .allocate_first_fit(layout)
-            .ok()
-            .map_or(0 as *mut u8, |allocation| allocation)
-    }
-
-    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        HEAP.heap
-            .borrow_mut()
-            .deallocate(ptr, layout)
-    }
-}
-
-/// SAFETY:
-/// The Sync implementation block is required by the compiler in order to have a shared internally
-/// mutable Heap.
-///
-/// This is basically a dummy implementation. The heap cannot be safely used across thread
-/// boundaries as it is likely to lead to data races. So: don't use in multi-threaded apps.
-unsafe impl Sync for RefCellHeap {}
 
 /// Align upwards. Returns the smallest x with alignment `align`
 /// so that x >= addr. The alignment must be a power of 2.

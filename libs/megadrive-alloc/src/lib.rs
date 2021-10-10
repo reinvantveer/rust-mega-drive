@@ -6,10 +6,10 @@
 mod heap;
 mod hole;
 
-use crate::heap::Heap;
+use crate::heap::Alloc;
 
 #[global_allocator]
-pub static mut ALLOCATOR: Heap = Heap::empty();
+pub static mut ALLOCATOR: Alloc = Alloc::empty();
 
 #[alloc_error_handler]
 fn alloc_error_handler(layout: core::alloc::Layout) -> ! {
