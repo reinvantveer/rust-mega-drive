@@ -8,6 +8,7 @@ members = [
     "tools/cargo-megadrive",
     "examples/megapong",
     "examples/megacoinflip",
+    "examples/megarogue"
 ]
 
 [profile.release]
