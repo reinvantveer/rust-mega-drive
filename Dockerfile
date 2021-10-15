@@ -21,5 +21,9 @@ RUN cargo megadrive --verbose build
 WORKDIR /rust-mega-drive/examples/megacoinflip
 RUN cargo megadrive --verbose build
 
+# Build rogue example
+WORKDIR /rust-mega-drive/examples/megarogue
+RUN cargo megadrive --verbose build
+
 # For now: copy at runtime the compiled target files to a /target dir that can be mounted using docker run -v
 CMD ["cp", "-r", "/rust-mega-drive/target", "/target"]
