@@ -8,7 +8,7 @@ use megadrive_sys::vdp::VDP;
 use megadrive_graphics::default_ascii::DEFAULT_FONT_1X1;
 
 static mut NEW_FRAME: u16 = 0;
-const BUTTON_THROTTLE_FRAMES: u8 = 20;
+const BUTTON_THROTTLE_FRAMES: u8 = 8;
 
 #[no_mangle]
 pub fn main() -> ! {
