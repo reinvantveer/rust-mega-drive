@@ -1,5 +1,6 @@
 .git
 .github
 Dockerfile*
-build.sh
+Makefile
 docker-compose.yml
+target
