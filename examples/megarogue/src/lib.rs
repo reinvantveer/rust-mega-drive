@@ -38,6 +38,10 @@ pub fn main() -> ! {
 
     let mut button_throttle_countdown = BUTTON_THROTTLE_FRAMES;
 
+    let mut player1 = Monster::player1();
+    player1.position = (x_off, y_off);
+    let mut monsters: [Option<Monster>; 10] = [None; 10];
+
     loop {
         renderer.clear();
         controllers.update();
