@@ -1,4 +1,7 @@
 #![no_std]
+
+mod monster;
+
 use core::ptr::{read_volatile, write_volatile};
 
 use megadrive_graphics::Renderer;
@@ -6,6 +9,8 @@ use megadrive_input::{Controllers, Button};
 use megadrive_util::rng::PseudoRng;
 use megadrive_sys::vdp::VDP;
 use megadrive_graphics::default_ascii::DEFAULT_FONT_1X1;
+
+use crate::monster::Monster;
 
 static mut NEW_FRAME: u16 = 0;
 const BUTTON_THROTTLE_FRAMES: u8 = 8;
