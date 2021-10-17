@@ -56,14 +56,14 @@ pub fn main() -> ! {
         // Do not set a new direction if the button throttle is engaged
         if let Some(c) = controllers.controller_state(0) {
             if button_throttle_countdown == 0 {
-                if c.down(Button::Up)    { move_direction = (0, -8); move_player1 = true; }
-                if c.down(Button::Left)  { move_direction = (-8, 0); move_player1 = true; }
-                if c.down(Button::Down)  { move_direction = (0,  8); move_player1 = true; }
-                if c.down(Button::Right) { move_direction = (8,  0); move_player1 = true; }
+                if c.down(Button::Up)    { move_direction = (0, -8); activate_turn = true; }
+                if c.down(Button::Left)  { move_direction = (-8, 0); activate_turn = true; }
+                if c.down(Button::Down)  { move_direction = (0,  8); activate_turn = true; }
+                if c.down(Button::Right) { move_direction = (8,  0); activate_turn = true; }
             }
 
             // Engage the button throttle
-            if move_player1 { button_throttle_countdown = BUTTON_THROTTLE_FRAMES; }
+            if activate_turn { button_throttle_countdown = BUTTON_THROTTLE_FRAMES; }
         }
 
         x_off += move_direction.0 as i16;
