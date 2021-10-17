@@ -66,8 +66,10 @@ pub fn main() -> ! {
             if activate_turn { button_throttle_countdown = BUTTON_THROTTLE_FRAMES; }
         }
 
-        x_off += move_direction.0 as i16;
-        y_off += move_direction.1 as i16;
+        // Update the player1 position from the input direction
+        player1.position.0 += move_direction.0;
+        player1.position.1 += move_direction.1;
+        DEFAULT_FONT_1X1.blit_text(&mut renderer, player1.map_symbol, player1.position.0 as u16, player1.position.1 as u16);
 
         let player1 = "@";
         DEFAULT_FONT_1X1.blit_text(&mut renderer, player1, x_off as u16, y_off as u16);
