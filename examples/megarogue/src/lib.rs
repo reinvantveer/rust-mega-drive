@@ -47,8 +47,8 @@ pub fn main() -> ! {
         controllers.update();
 
         if button_throttle_countdown > 0 { button_throttle_countdown -= 1; }
-        let mut move_direction: (i8, i8) = (0, 0);
-        let mut move_player1 = false;
+        let mut move_direction: (i16, i16) = (0, 0);
+        let mut activate_turn = false;
 
         // Always roll: it updates the seed so that the outcome will be different every game
         let random_number = rng.random();
