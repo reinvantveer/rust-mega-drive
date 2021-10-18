@@ -51,7 +51,7 @@ pub fn main() -> ! {
         let mut activate_turn = false;
 
         // Always roll: it updates the seed so that the outcome will be different every game
-        let random_number = rng.random();
+        let _random_number = rng.random();
 
         // Do not set a new direction if the button throttle is engaged
         if let Some(c) = controllers.controller_state(0) {
