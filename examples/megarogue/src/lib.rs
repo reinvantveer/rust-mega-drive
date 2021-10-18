@@ -71,9 +71,16 @@ pub fn main() -> ! {
         player1.position.1 += move_direction.1;
         DEFAULT_FONT_1X1.blit_text(&mut renderer, player1.map_symbol, player1.position.0 as u16, player1.position.1 as u16);
 
-        let player1 = "@";
-        DEFAULT_FONT_1X1.blit_text(&mut renderer, player1, x_off as u16, y_off as u16);
-
+        for maybe_monster in &monsters {
+            if let Some(monster) = maybe_monster {
+                DEFAULT_FONT_1X1.blit_text(
+                    &mut renderer,
+                    monster.map_symbol,
+                    monster.position.0 as u16,
+                    monster.position.1 as u16
+                );
+            }
+        }
 
         renderer.render(&mut vdp);
         // vsync
